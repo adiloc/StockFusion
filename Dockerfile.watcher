@@ -1,0 +1,22 @@
+# Use Arch Linux as the base image
+FROM archlinux:latest
+
+# Install necessary dependencies
+RUN pacman -Syu --noconfirm \
+    && pacman -S --noconfirm \
+    bash \
+    inotify-tools \
+    curl \
+    && pacman -Scc --noconfirm  # Clean up the package cache
+
+# Set the working directory
+WORKDIR /scripts
+
+# Copy the watch file script into the container
+COPY ./scripts /scripts
+
+# Make the watch_files.sh script executable
+RUN chmod +x /scripts/watch_files.sh
+
+# Start the script on container startup
+CMD ["bash", "/scripts/watch_files.sh"]

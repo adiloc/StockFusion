@@ -1,0 +1,56 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile.php
+    volumes:
+      - ./html:/var/www/html  # Mount your PHP application files
+    networks:
+      - app-network  # Shared network
+ 
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "8080:80"  # Expose Nginx on port 8080
+    depends_on:
+      - php  # Ensure PHP-FPM starts before Nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf  # Your custom Nginx config
+      - ./html:/var/www/html  # Application files
+    networks:
+      - app-network
+  
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: app_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-network
+
+  watcher:
+    build:
+      context: .
+      dockerfile: Dockerfile.watcher
+    container_name: file-watcher
+    command: bash -c "chmod +x /scripts/watch_files.sh && /scripts/watch_files.sh"
+    volumes:
+      - ./scripts:/scripts
+      - ./html:/var/www/html
+    depends_on:
+      - php
+      - nginx
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:

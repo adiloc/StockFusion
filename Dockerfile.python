@@ -1,0 +1,18 @@
+# Use an official Python image
+FROM python:3.10-slim
+
+# Set the working directory
+WORKDIR /app
+
+# Install dependencies
+COPY ./python/requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy Python scripts into the container
+COPY ./python /app
+
+# Expose the necessary port (for web apps or APIs)
+EXPOSE 5000
+
+# Run the Python script
+CMD ["python", "my_python_script.py"]
